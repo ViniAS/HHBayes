@@ -1,4 +1,3 @@
-
 data {
   int<lower=1> N; // Total number of people
   int<lower=1> T; // Total days
@@ -12,23 +11,23 @@ data {
   int<lower=0, upper=1> use_curve_logic; // 1 = Use Gamma Curve Fallback
 
   // --- INDEXING ---
-  int<lower=1, upper=H> hh_id[N];   // Household ID for each person
-  int<lower=1, upper=R> role_id[N]; // Role ID for each person
+  array[N] int<lower=1, upper=H> hh_id;   // Household ID for each person
+  array[N] int<lower=1, upper=R> role_id; // Role ID for each person
 
   // --- OUTCOMES ---
-  int<lower=0, upper=1> I[N, T];        // 1 if infected on day t (Event)
-  int<lower=0, upper=1> Y[N, T];        // 1 if infectious on day t (State)
-  real V[N, T];                         // Viral Load value on day t
-  int<lower=1, upper=T> start_risk[N];  // Day when risk starts for person n
+  array[N, T] int<lower=0, upper=1> I;        // 1 if infected on day t (Event)
+  array[N, T] int<lower=0, upper=1> Y;        // 1 if infectious on day t (State)
+  array[N, T] real V;                         // Viral Load value on day t
+  array[N] int<lower=1, upper=T> start_risk;  // Day when risk starts for person n
 
   // --- HOUSEHOLD STRUCTURE ---
-  int<lower=1> hh_size_people[H];
+  array[H] int<lower=1> hh_size_people;
 
   // --- SPARSE CONTACT MATRIX (The Speed Fix) ---
   int<lower=0> n_contacts;                       // Total number of directed edges
-  int<lower=1, upper=N> contact_src[n_contacts]; // Infector ID (Source)
-  int<lower=1, upper=N> contact_tgt[n_contacts]; // Susceptible ID (Target)
-  real<lower=0> contact_w[n_contacts];           // Contact Weight (0 to 1)
+  array[n_contacts] int<lower=1, upper=N> contact_src; // Infector ID (Source)
+  array[n_contacts] int<lower=1, upper=N> contact_tgt; // Susceptible ID (Target)
+  array[n_contacts] real<lower=0> contact_w;           // Contact Weight (0 to 1)
 
   // --- FORCING & REFERENCE ---
   matrix[T, R] seasonal_forcing_mat;
@@ -62,7 +61,7 @@ data {
 transformed data {
   // Pre-calculate the exact day of infection for efficiency
   // 0 means "Never infected"
-  int infection_day[N];
+  array[N] int infection_day;
   for (n in 1:N) {
     infection_day[n] = 0;
     for (t in start_risk[n]:T) {
@@ -303,4 +302,3 @@ model {
     }
   }
 }
-
